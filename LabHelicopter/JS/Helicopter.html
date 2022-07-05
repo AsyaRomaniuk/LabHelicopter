@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Вікно вхідних даних задачі</title>
+		<style>
+			th{
+				text-align:left;
+				}
+			button{
+				width: 100%;
+			}
+			.canvas-style{
+				background-color: #e8ffe8;
+				border: 4px solid black;
+				width: 100%; 
+				position: fixed; 
+				top: 0; 
+				left: 0; 
+			}
+			.center-screen{
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				min-height: 100vh;
+			}
+			.no_selection{
+				-webkit-touch-callout: none; /* iOS Safari */
+				-webkit-user-select: none; /* Safari */
+				-khtml-user-select: none; /* Konqueror HTML */
+				-moz-user-select: none; /* Old versions of Firefox */
+				-ms-user-select: none; /* Internet Explorer/Edge */
+				user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+		}
+		</style>
+	</head>
+	<body bgcolor="#F0F0F0">
+		<!--<menu type="context" id="right-menu">Yes</menu>-->
+		<div class="center-screen" id="main">
+		<fieldset style="width:600px">
+			<legend align="center"><font face="Times" size=5><b><label class=no_selection>ПРОЄКТ "БОЙОВИЙ ГВИНТОКРИЛ"</label></b></font></legend>
+				<div align="center">
+				<table>
+				<tbody>
+					<tr>
+						<th><label class=no_selection>Координата макс. безпечної висоти Ya:</label></th>
+						<td><input text id="enter1" value="0"></input></td>
+					</tr>
+					<tr>
+							<th><label class=no_selection>Координати лівого краю моста X1, Y1:</label></th>
+							<td><input text id="enter2" value="0 0"></input></td>
+					</tr>
+					<tr>
+							<th><label class=no_selection>Координати моста Xb, Yb:</label></th>
+							<td><input text id="enter3" value="0 0"></input></td>
+					</tr>
+					<tr>
+							<th><label class=no_selection>Координати землі Xe, Ye:</label></th>
+							<td><input text id="enter4" value="0 0"></input></td>
+					</tr>
+					<tr>
+							<th><label class=no_selection>Координати правого краю моста X2, Y2:</label></th>
+							<td><input text id="enter5" value="0 0"></input></td>
+					</tr>
+					<tr>
+							<th><label class=no_selection>Ширина і висота поля  W, H:</label></th>
+							<td><input text id="enter6" value="0 0"></input></td>
+					</tr>
+				</tbody>
+				</table>
+				<table>
+				<tbody>
+					<tr>
+						<th><button onclick="eval()" title="Нажміть щоб отримати рекомендації">Результат</button></th>
+						<td><button onclick="dataexample()" title="Задає координати для наглядного прикладу">Контрольний приклад</button></td>
+					</tr>
+					<tr>
+						<th><button onclick="clearall()" title="Очищує координати полей Entry">Очистити поля</button></th>
+						<td><button onclick="window.open('https://drive.google.com/file/d/1-MsFejNgq8smBRzNbeuYd4SR41UWCgvi/view?usp=sharing', '_blank')" title="Постановка задачі.pdf">Детальніше про проєкт</button></td>
+					</tr>
+				</tbody>
+				</table>
+				</div>
+		</fieldset>
+		</div>
+	<script>
+			
+			function create_picture(x1, y1, xb, yb, xe, ye, x2, y2, wd, ht, ya, lf, rg, un){
+				//document.requestFullScreen();
+				document.addEventListener('contextmenu', function(e) {
+					//document.cancelFullScreen();
+					window.location.reload();
+					e.preventDefault();
+				}, false);
+				document.getElementById("main").remove();
+				let w = screen.width;
+				let h = screen.height;
+				let constant = x2 + x1;
+				let bridgeconstant = (x2 - x1) * 0.08
+				var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+				svg.setAttribute('class', 'center-screen canvas-style');
+				svg.setAttribute("cursor", "pointer");
+				document.body.appendChild(svg);
+				create_line(svg, [constant, 0, constant, h], "grey", 2, "rightside");
+				create_polygon(svg, [0, h, 0, h-y1, x1, h-y1, xb, h-ye, xe, h-ye, x2, h-y2, constant, h-y2, constant, h], 
+				"grey", "grey", 2, "polygon");
+				create_line(svg, [xb, h-ye, xe, h-ye], "blue", 16, "water");
+				create_line(svg, [xb, h-yb, xb, h-ye], "grey", 10, "column1");
+				create_line(svg, [xe, h-ye, xe, h-yb], "grey", 10, "column2");
+				create_line(svg, [x1, h-y1, xb, h-yb, xe, h-yb, x2, h-y2], "black", 4, "bridge");
+				create_line(svg, [x1, h-y1, xb, h-yb-bridgeconstant, xe, h-yb-bridgeconstant, x2, h-y2], "black", 2, "topbridge");
+				create_line(svg, [xb, h-yb, xe, h-yb-bridgeconstant], "black", 2, "lineup");
+				create_line(svg, [xb, h-yb-bridgeconstant, xe, h-yb], "black", 2, "linedown");
+				create_rectangle(svg, x1/2-wd/2, h-(y1+(ya-y1)/2)-ht/2, wd, ht, lf, "blue", 3, "rect1");
+				create_rectangle(svg, x2 + (constant-x2)/2-wd/2, h-(y2+(ya-y2)/2)-ht/2, wd, ht, rg, "blue", 3, "rect2");
+				create_rectangle(svg, xb + (xe - xb)/2-wd/2, h-(ye + (yb-ye)/2)-ht/2, wd, ht, un, "blue", 3, "rect3");
+				create_oval(svg, x1/2, h-(y1+(ya-y1)/2), 5, 5, "cyan", "blue", 1, "dot1");
+				create_oval(svg, x2 + (constant-x2)/2, h-(y2+(ya-y2)/2), 5, 5, "cyan", "blue", 1, "dot2");
+				create_oval(svg, xb + (xe-xb)/2, h-(ye + (yb-ye)/2), 5, 5, "cyan", "blue", 1, "dot3");
+				create_text(svg, x1/2, h-(y1+(ya-y1)/2)-10, "", null, "txt1");
+				create_text(svg, x2 + (constant-x2)/2, h-(y2+(ya-y2)/2)-10, "", null, "txt1");
+				create_text(svg, xb + (xe-xb)/2, h-(ye + (yb-ye)/2)-10, "", null, "txt1");
+				create_tree(svg, (xe+(x2-xe)*0.12), ye, "green", (yb-ye)*0.004, h);
+				create_tree(svg, x1+(xb-x1)*0.88, ye, "green", (yb-ye)*0.004, h);
+				create_tree(svg, x1+(xb-x1)*0.64, ye+(y1-ye)*0.24, "green", (yb-ye)*0.004, h);
+				create_line(svg, [0, h-ya, constant, h-ya], "red", 2, "limit", "10 4");
+				create_oval(svg, x1, h-y1, 5, 5, "yellow", "white", 2, "c1");
+				create_oval(svg, xb, h-yb, 5, 5, "yellow", "white", 2, "c2");
+				create_oval(svg, xe, h-ye, 5, 5, "yellow", "white", 2, "c3");
+				create_oval(svg, x2, h-y2, 5, 5, "yellow", "white", 2, "c4");
+				create_text(svg, constant+(w-constant)/2, h-h/2, "", null, "tag_text");
+				create_text(svg, constant+(w-constant)/2, h-h/2-h/4, "", null, "tag_square");
+				create_text(svg, constant+(w-constant)/2, h-h/2+h/4, "", null, "tag_coord");
+				let square = document.getElementById("tag_square");
+				let rect1 = document.getElementById("rect1");
+				rect1.addEventListener("mouseover", function(){
+					square.innerHTML = `${wd}x${ht}\nПлоща безпечної\nзони\n${wd*ht} кв.од`;
+					rect1.setAttribute("fill", "#e8ffe8");
+					rect1.setAttribute('stroke', "grey");
+				});
+				rect1.addEventListener("mouseout", function(){
+					square.innerHTML = "";
+					rect1.setAttribute("fill", lf);
+					rect1.setAttribute('stroke', "blue");
+				});
+				let rect2 = document.getElementById("rect2");
+				rect2.addEventListener("mouseover", function(){
+					square.innerHTML = `${wd}x${ht}\nПлоща безпечної\nзони\n${wd*ht} кв.од`;
+					rect2.setAttribute("fill", "#e8ffe8");
+					rect2.setAttribute('stroke', "grey");
+				});
+				rect2.addEventListener("mouseout", function(){
+					square.innerHTML = "";
+					rect2.setAttribute("fill", rg);
+					rect2.setAttribute('stroke', "blue");
+				});
+				let rect3 = document.getElementById("rect3");
+				rect3.addEventListener("mouseover", function(){
+					square.innerHTML = `${wd}x${ht}\nПлоща безпечної\nзони\n${wd*ht} кв.од`;
+					rect3.setAttribute("fill", "#e8ffe8");
+					rect3.setAttribute('stroke', "grey");
+				});
+				rect3.addEventListener("mouseout", function(){
+					square.innerHTML = "";
+					rect3.setAttribute("fill", un);
+					rect3.setAttribute('stroke', "blue");
+				});
+				let limit = document.getElementById("limit");
+				let coord = document.getElementById("tag_coord");
+				limit.addEventListener("mouseover", function(){
+					coord.innerHTML = `Максимальна безпечна\nвисота ${ya}`;
+					limit.setAttribute("stroke", "black");
+				});
+				limit.addEventListener("mouseout", function(){
+					coord.innerHTML = "";
+					limit.setAttribute("stroke", "red");
+				});
+				let c1 = document.getElementById("c1");
+				c1.addEventListener("mouseover", function(){
+					coord.innerHTML = `(X1;Y1)\n${x1};${y1}`;
+					c1.setAttribute("stroke", "black");
+				});
+				c1.addEventListener("mouseout", function(){
+					coord.innerHTML = "";
+					c1.setAttribute("stroke", "white");
+				});
+				let c2 = document.getElementById("c2");
+				c2.addEventListener("mouseover", function(){
+					coord.innerHTML = `(Xb;Yb)\n${xb};${yb}`;
+					c2.setAttribute("stroke", "black");
+				});
+				c2.addEventListener("mouseout", function(){
+					coord.innerHTML = "";
+					c2.setAttribute("stroke", "white");
+				});
+				let c3 = document.getElementById("c3");
+				c3.addEventListener("mouseover", function(){
+					coord.innerHTML = `(Xe;Ye)\n${xe};${ye}`;
+					c3.setAttribute("stroke", "black");
+				});
+				c3.addEventListener("mouseout", function(){
+					coord.innerHTML = "";
+					c3.setAttribute("stroke", "white");
+				});
+				let c4 = document.getElementById("c4");
+				c4.addEventListener("mouseover", function(){
+					coord.innerHTML = `(X2;Y2)\n${x2};${y2}`;
+					c4.setAttribute("stroke", "black");
+				});
+				c4.addEventListener("mouseout", function(){
+					coord.innerHTML = "";
+					c4.setAttribute("stroke", "white");
+				});
+				let tag_text = document.getElementById("tag_text");
+				document.addEventListener("click", function(e){
+					tag_text.innerHTML = `(${e.offsetX};${h-e.offsetY})`;
+				});
+			}
+			
+			function create_tree(canv, xc, yc, clr = "green", size = 1, h = 1000){
+				let tree = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+				tree.setAttribute("points", [xc-10*size, h-yc, xc+10*size, h-yc, xc+10*size, h-yc-10*size,
+                        xc+40*size, h-yc, xc+20*size, h-yc-40*size, xc+30*size, h-yc-35*size,
+                        xc+15*size, h-yc-65*size, xc+25*size, h-yc-60*size,
+                        xc, h-yc-100*size, xc-25*size, h-yc-60*size,  xc-15*size, h-yc-65*size,
+                        xc-30*size, h-yc-35*size, xc-20*size, h-yc-40*size, xc-40*size, h-yc,
+                        xc-10*size, h-yc-10*size]);
+				tree.setAttribute("fill", clr);
+				canv.appendChild(tree);
+			}
+			
+			function create_text(canv, x, y, tx, font, id=null){
+				let txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+				txt.setAttribute("id", id);
+				txt.setAttribute("x", x);
+				txt.setAttribute("y", y);
+				txt.setAttribute('font', font);
+				txt.innerHTML = tx;
+				canv.appendChild(txt);
+			}
+			
+			function create_line(canv, crds_arr, clr="black", wd=2, id=null, dash=null){
+				let line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+				line.setAttribute("id", id);
+				line.setAttribute("points", crds_arr);
+				line.setAttribute("fill", "none");
+				line.setAttribute('stroke', clr);
+				line.setAttribute('stroke-width', wd);
+				line.setAttribute("stroke-dasharray", dash)
+				canv.appendChild(line);
+			}
+			
+			function create_polygon(canv, crds_arr, clr="black", outline="black", wd=2, id=null){
+				let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+				polygon.setAttribute("id", id);
+				polygon.setAttribute("points", crds_arr);
+				polygon.setAttribute("fill", clr);
+				polygon.setAttribute('stroke', outline);
+				polygon.setAttribute('stroke-width', wd);
+				canv.appendChild(polygon);
+			}
+			
+			function create_rectangle(canv, x, y, width, height, clr="black", outline="black", wd=2, id=null){
+				let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+				rect.setAttribute("id", id);
+				rect.setAttribute("x", x);
+				rect.setAttribute("y", y);
+				rect.setAttribute("width", width);
+				rect.setAttribute("height", height);
+				rect.setAttribute("fill", clr);
+				rect.setAttribute('stroke', outline);
+				rect.setAttribute('stroke-width', wd);
+				rect.setAttribute("stroke-dasharray", "5 3")
+				canv.appendChild(rect);
+			}
+			
+			function create_oval(canv, x, y, rx, ry, clr="black", outline="black", wd=1, id=null){
+				let oval = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+				oval.setAttribute("id", id);
+				oval.setAttribute("cx", x);
+				oval.setAttribute("cy", y);
+				oval.setAttribute("rx", rx);
+				oval.setAttribute("ry", ry);
+				oval.setAttribute("fill", clr);
+				oval.setAttribute('stroke', outline);
+				oval.setAttribute('stroke-width', wd);
+				canv.appendChild(oval);
+			}
+			
+			function clearall()
+			{ 
+				document.getElementById("enter1").value = "";
+				document.getElementById("enter2").value = "";
+				document.getElementById("enter3").value = "";
+				document.getElementById("enter4").value = "";
+				document.getElementById("enter5").value = "";
+				document.getElementById("enter6").value = "";
+			}
+			
+			function dataexample()
+			{
+				document.getElementById("enter1").value = "360";
+				document.getElementById("enter2").value = "200 240";
+				document.getElementById("enter3").value = "350 240";
+				document.getElementById("enter4").value = "600 100";
+				document.getElementById("enter5").value = "750 240";
+				document.getElementById("enter6").value = "150 60";
+			}
+			
+			function eval()
+			{
+				var message = "";
+				var left = "red";
+				var right = "red";
+				var under = "red";
+				var Ya = Number(document.getElementById("enter1").value);
+				var X1 = Number(document.getElementById("enter2").value.split(" ")[0]);
+				var Y1 = Number(document.getElementById("enter2").value.split(" ")[1]);
+				var Xb = Number(document.getElementById("enter3").value.split(" ")[0]);
+				var Yb = Number(document.getElementById("enter3").value.split(" ")[1]);
+				var Xe = Number(document.getElementById("enter4").value.split(" ")[0]);
+				var Ye = Number(document.getElementById("enter4").value.split(" ")[1]);
+				var X2 = Number(document.getElementById("enter5").value.split(" ")[0]);
+				var Y2 = Number(document.getElementById("enter5").value.split(" ")[1]);
+				var W = Number(document.getElementById("enter6").value.split(" ")[0]);
+				var H = Number(document.getElementById("enter6").value.split(" ")[1]);
+				var constant = X2 + X1;
+				if ((X1 - W > 0) && (Ya - Y1 > H))
+				{
+					left = "lightgreen";
+					message = message + "Можна пролетіти над мостом зліва: ("+(X1/2)+";"+(Y1+(Ya-Y1)/2)+")\n";
+				}
+				if (Ya - Y2 > H)
+				{
+					right = "lightgreen";
+					message = message + "Можна пролетіти над мостом справа: ("+(X2 + (constant-X2)/2)+";"+(Y2+ (Ya-Y2)/2)+")\n";
+				}
+				if ((Ya > Ye + (Yb - Ye)/2 + H/2) && (Yb > Ye + (Yb - Ye)/2 + H/2) && (Xb + W < Xe))
+				{
+					under = "lightgreen";
+					message = message + "Можна пролетіти під мостом:("+(Xb + (Xe - Xb)/2)+";"+(Ye + (Yb - Ye)/2)+")";
+				}
+				if (message == "") { message = "На жаль, рекомендацій по шляху немає."; }
+				alert(message);
+				create_picture(X1, Y1, Xb, Yb, Xe, Ye, X2, Y2, W, H, Ya, left, right, under);
+			}
+		</script>
+	</body>
+ </html>
